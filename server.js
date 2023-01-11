@@ -3,7 +3,7 @@ const routes = require("./routes/config");
 const app = express();
 
 require('dotenv').config();
-
+// render.com
 function startServer(){
     routes.configure(app);
     app.listen(process.env.APP_PORT || 3000, err => {
