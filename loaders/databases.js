@@ -1,11 +1,11 @@
 require('dotenv').config(); 
 const MongoClient = require('mongodb').MongoClient;
 
-exports.connect = async () =>{
-    return await MongoClient.connect(process.env.MgDB_Uri  , 
+exports.mg_connect = async () =>{
+    return await MongoClient.connect(process.env.MG_URI  , 
         { useUnifiedTopology: true }).then (database => {
-            console.log("Connected to MongoDB at Db_name : '" + process.env.MgDB_Database+"' ");
-            return database.db(process.env.MgDB_Database);
+            console.log("Connected to MongoDB at Db_name : '" + process.env.MG_DBNAME+"' ");
+            return database.db(process.env.MG_DBNAME);
     }).catch(err => {
         console.error(err)
     });
