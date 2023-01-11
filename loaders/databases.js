@@ -7,6 +7,6 @@ exports.mg_connect = async () =>{
             console.log("Connected to MongoDB at Db_name : '" + process.env.MG_DBNAME+"' ");
             return database.db(process.env.MG_DBNAME); 
     }).catch(err => {
-        console.error(err)
+        console.error(err) 
     });
 }
