@@ -1,10 +1,12 @@
-const router = require('express').Router();
-const authVerify = require('../services/authVerify');
- 
+const userContoller = require('../controllers/users.controller');
+const authVerify = require('../middlewares/authVerify');
 
-module.exports = (database) => {
-    
 
-    return router;
+module.exports = (app , database) => {
+
+    app.get('/users',authVerify.verifyToken, (req, res) => {
+        userContoller.getUser(database , res)
+    });
+
 }
 
