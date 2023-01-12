@@ -31,10 +31,11 @@ function startServer(){
             console.log('Server listening on port ', process.env.NODE_PORT || 3000);
         });
         
-        app.get('/' , function (req, res, next) {
-            res.send('Node Server Running ...');
-        });
     });
 }
+
 startServer();
 
+app.get('/' , function (req, res, next) {
+    res.send('Node Server Running ...');
+});

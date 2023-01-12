@@ -1,5 +1,5 @@
 const userContoller = require('../controllers/users.controller');
-const authVerify = require('../services/authVerify');
+const authVerify = require('../middlewares/authVerify');
 
 
 module.exports = (app , database) => {
