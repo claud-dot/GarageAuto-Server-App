@@ -5,10 +5,10 @@ const app = express();
 require('dotenv').config();
 // render.com
 function startServer(){
-    routes.configure(app);
+    routes.configure(app); 
     app.listen(process.env.APP_PORT || 3000, err => {
         if (err) throw err;
-        console.log('Server listening on port '+process.env.APP_PORT || 3000);
+        console.log('Server listening on port ',process.env.APP_PORT || 3000);
     })
 }
 
