@@ -1,9 +1,10 @@
+require('dotenv').config();
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signUp = async (dataUser,database, res)=>{
 
-    const user = {
+    const userData = {
         name: dataUser.name,
         lastname: dataUser.lastname,
         email: dataUser.email,
@@ -22,7 +23,7 @@ exports.signUp = async (dataUser,database, res)=>{
         }
 
         //check if userName exists
-        database.collection('users').findOne({ name : user .name , lastname : user.lastname }, (err, user) => {
+        database.collection('users').findOne({ name : userData.name , lastname : userData.lastname }, (err, user) => {
             if (err) {
                 res.status(500).send({ message: err });
                 return;
@@ -34,7 +35,7 @@ exports.signUp = async (dataUser,database, res)=>{
             }
     
             //check if email exists
-            database.collection('users').findOne({ email : dataUser.email },(err, user)=>{
+            database.collection('users').findOne({ email : userData.email },(err, user)=>{
                 if (err) {
                     res.status(500).send({ message: err });
                     return;
@@ -45,7 +46,7 @@ exports.signUp = async (dataUser,database, res)=>{
                     return;
                 }
             
-                database.collection("users").insertOne(dataUser, (err, result)=>{
+                database.collection("users").insertOne(userData, (err, result)=>{
                     if(err){
                         res.status(500).send({ message: err });
                         return;
@@ -60,35 +61,31 @@ exports.signUp = async (dataUser,database, res)=>{
     })
 }
 
-exports.signIn = async (dataUser,database, res)=>{
-    const userData = {
-        email : dataUser.email,
-        role : dataUser.role,
-        password : bcrypt.hashSync(dataUser.password)
-    }
-
-    database.collection('users').findOne(user, (err, user)=>{
+exports.signIn = async (dataUser,database, res , req)=>{
+    
+    database.collection('users').findOne({email : dataUser.email}, (err, user)=>{
         if(err){
             res.status(500).send({ message: err });
             return;
         }
-
+        
         if (!user) {
-            return res.status(404).send({ message: "User Not found." });
-        }
-
-        var passwordIsValid = bcrypt.compareSync(userData.password, user.password);
-        console.log(passwordIsValid);
-        if (!passwordIsValid) {
-            return res.status(401).send({ message: "Invalid Password!" });
+            res.status(404).send({ message: "User Not found." });
+            return;
         }
         
-        var token = jwt.sign({ id: user._id }, config.secret, {
-            expiresIn: 86400, // 24 hours
+        var passwordIsValid = bcrypt.compareSync(dataUser.password, user.password);
+        if (!passwordIsValid) {
+            res.status(401).send({ message: "Invalid Password!" });
+            return 
+        }
+        
+        var token = jwt.sign({ id: user._id }, process.env.SESSION_SECRET, {
+            expiresIn: '24h', // 24 hours
         });
 
         req.session.token = token;
-
+        
         res.status(200).send({
             id: user._id,
             name: user.name,
