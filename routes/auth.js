@@ -7,7 +7,6 @@ module.exports = (app,database) => {
     });
 
     app.post('/auth/signin', (req, res , next) => {
-        console.log(req.session);
         authController.signIn(req.body, database , res , req);
     });
 
