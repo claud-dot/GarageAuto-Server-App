@@ -11,7 +11,7 @@ module.exports = (app,database) => {
     });
 
     app.post('/auth/signout', (req, res , next) => {
-        authController.signOut(req , res , next)
+        authController.signOut(req , res , next)     
     });
 
 }
