@@ -11,7 +11,6 @@ const http = require('http').createServer(app);
 
 require('dotenv').config();
 
-
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());

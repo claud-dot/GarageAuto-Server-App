@@ -1,6 +1,7 @@
 
 const users = require('./users');
 const auth = require('./auth');
+const workshop = require('./workshop');
 
 
 function configure(app , database) {
@@ -10,6 +11,10 @@ function configure(app , database) {
 
     //Users
     users(app,database);
+
+    //Responsable atelier
+    workshop(app , database);
+
 }
 
 exports.configure = configure;
