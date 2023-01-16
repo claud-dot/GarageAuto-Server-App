@@ -5,7 +5,7 @@ const authVerify = require('../middlewares/authVerify');
 module.exports = (app , database) => {
 
     app.get('/users',authVerify.verifyToken, (req, res) => {
-        userContoller.getUser(database , res)
+        userContoller.getUser(database , res);
     });
 
 }
