@@ -1,8 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const session = require('express-session');
-const cookieParser = require("cookie-parser");
-
+const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");  
 const database  = require('./loaders/databases');
 const routes = require("./routes/config");
@@ -11,16 +9,21 @@ const http = require('http').createServer(app);
 
 require('dotenv').config();
 
-app.use(cors());
+app.use(cors({
+    origin : [process.env.CLIENT_LOCAL_URL , process.env.CLIENT_PROD_URL],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    saveUninitialized: true,
-    resave: true
-}));
-
+app.use(express.urlencoded({ extended: true }));
+app.use(
+    cookieSession({
+      name: "garazeAuto-session",
+      secret: process.env.COOKIE_SECRET, // should use as secret environment variable
+      httpOnly: true
+    })
+);
 
 function startServer(){
     database.mg_connect().then( db => {

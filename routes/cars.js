@@ -4,7 +4,7 @@ const authVerify = require('../middlewares/authVerify');
 
 module.exports = ( app , database)=>{
 
-    app.get('/cars', (req , res)=>{
+    app.get('/cars', [authVerify.verifyToken] , (req , res)=>{
         carContoller.getCars(database,res);
     })
 
