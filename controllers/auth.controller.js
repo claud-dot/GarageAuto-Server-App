@@ -5,30 +5,29 @@ var bcrypt = require("bcryptjs");
 exports.signUp = async (dataUser,database, res)=>{
 
     const userData = {
-        name: dataUser.name,
-        lastname: dataUser.lastname,
+        username :  dataUser.username,
         email: dataUser.email,
         role : dataUser.role,
         password : bcrypt.hashSync(dataUser.password)
     };
-
     //check if role exists
     database.collection('user_role').findOne({ role : dataUser.role },(err, userRole) => {
         if(err){
             return res.status(500).send({ message: err });
         }
-
+        
         if(!userRole){
             return res.status(400).send({ message: 'Failed! Role does not exist'});
         }
-
+        
         //check if userName exists
-        database.collection('users').findOne({ name : userData.name , lastname : userData.lastname }, (err, user) => {
+        database.collection('users').findOne({ username : userData.username }, (err, user) => {
             if (err) {
                 res.status(500).send({ message: err });
                 return;
             }
-    
+            
+            console.log(err , user);
             if (user) {
                 res.status(400).send({ message: 'Failed ! Username already in use !' });
                 return;
@@ -63,7 +62,7 @@ exports.signUp = async (dataUser,database, res)=>{
 
 exports.signIn = async (dataUser,database, res , req)=>{
     
-    database.collection('users').findOne({email : dataUser.email}, (err, user)=>{
+    database.collection('users').findOne({ email : dataUser.email , role : dataUser.role }, (err, user)=>{
         if(err){
             res.status(500).send({ message: err });
             return;
@@ -85,11 +84,9 @@ exports.signIn = async (dataUser,database, res , req)=>{
         });
 
         req.session.token = token;
-        
         res.status(200).send({
             id: user._id,
-            name: user.name,
-            lastname : user.lastname,
+            username : user.username,
             email: user.email,
             role: user.role,
         });
@@ -97,12 +94,10 @@ exports.signIn = async (dataUser,database, res , req)=>{
 }
 
 exports.signOut = async (req, res, next)=>{
-    req.session.destroy((err)=>{
-        if(err){
-            res.status(500).send({ message: err });
-            return;
-        }
-
-        res.status(200).send({ message: "User logged out successfully!" });
-    });
+    try {
+        req.session = null;
+        return res.status(200).send({ message: "You've been signed out!" });
+    } catch (err) {
+    this.next(err);
+    }
 }
