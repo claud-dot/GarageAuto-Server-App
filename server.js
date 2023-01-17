@@ -10,7 +10,8 @@ const http = require('http').createServer(app);
 require('dotenv').config();
 
 app.use(cors({
-    origin : [process.env.CLIENT_LOCAL_URL , process.env.CLIENT_PROD_URL]
+    origin : [process.env.CLIENT_LOCAL_URL , process.env.CLIENT_PROD_URL],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(bodyParser.json());
