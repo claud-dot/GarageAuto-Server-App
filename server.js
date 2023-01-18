@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const bodyParser = require("body-parser");  
 const database  = require('./loaders/databases');
 const routes = require("./routes/config");
@@ -26,11 +27,11 @@ app.use(cookieParser());
 //     saveUninitialized : true,
 //     cookie : {
 //         sameSite : "none",
-//         secure : true
+//         secure : false
 //     },
-//     secret: process.env.COOKIE_SECRET, 
-//     claudmja2.0@gmail.com testU7*
+//     secret: process.env.COOKIE_SECRET
 // }))
+app.set('trust proxy' , 1);
 
 app.use(
     cookieSession({
