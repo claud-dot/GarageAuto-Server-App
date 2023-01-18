@@ -22,10 +22,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({
     name : "garazeAuto-session",
-    resave:false,
+    resave: false,
     saveUninitialized : true,
+    cookie : {
+        sameSite : "none",
+        secure : true
+    },
     secret: process.env.COOKIE_SECRET,
 }))
+
+app.set('trust proxy' , 1);
 // app.use(
 //     cookieSession({
 //       name: "garazeAuto-session",
