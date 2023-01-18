@@ -21,26 +21,27 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(session({
-    name : "garazeAuto-session",
-    resave: false,
-    saveUninitialized : true,
-    cookie : {
-        sameSite : "none",
-        secure : true
-    },
-    secret: process.env.COOKIE_SECRET
-}))
+// app.use(session({
+//     name : "garazeAuto-session",
+//     resave: false,
+//     saveUninitialized : true,
+//     cookie : {
+//         sameSite : "none",
+//         secure : false
+//     },
+//     secret: process.env.COOKIE_SECRET
+// }))
+app.set('trust proxy' , 1);
 
-// app.use(
-//     cookieSession({
-//       name: "garazeAuto-session",
-//       secret: process.env.COOKIE_SECRET, // should use as secret environment variable
-//       httpOnly : true,
-//       sameSite : config.cookie_session.sameSite,
-//       secure : config.cookie_session.secure
-//     })
-// );
+app.use(
+    cookieSession({
+      name: "garazeAuto-session",
+      secret: process.env.COOKIE_SECRET, // should use as secret environment variable
+      httpOnly : true,
+      sameSite : config.cookie_session.sameSite,
+      secure : config.cookie_session.secure
+    })
+);
 
 function startServer(){
     database.mg_connect().then( db => {
