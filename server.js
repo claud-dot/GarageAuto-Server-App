@@ -21,7 +21,8 @@ app.use(
     cookieSession({
       name: "garazeAuto-session",
       secret: process.env.COOKIE_SECRET, // should use as secret environment variable
-      httpOnly : true
+      httpOnly : true,
+      secure : true
     })
 );
 
