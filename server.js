@@ -11,7 +11,8 @@ require('dotenv').config();
 
 app.use(cors({
     origin : [process.env.CLIENT_LOCAL_URL , process.env.CLIENT_PROD_URL],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 app.use(express.json());
 app.use(bodyParser.json());
@@ -20,7 +21,7 @@ app.use(
     cookieSession({
       name: "garazeAuto-session",
       secret: process.env.COOKIE_SECRET, // should use as secret environment variable
-      httpOnly: true
+      httpOnly: false
     })
 );
 
