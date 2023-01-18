@@ -11,7 +11,7 @@ const config = convict({
     },
     cookie_session : {
         secure : {
-            format : Boolean,
+            format : Boolean, 
             default : true,
             arg : "secure",
         },
