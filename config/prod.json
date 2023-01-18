@@ -1,0 +1,7 @@
+{
+    "cookie_session" : {
+        "secure" : false,
+        "sameSite" : "none"
+    }
+}
+   

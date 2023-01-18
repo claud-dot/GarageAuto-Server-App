@@ -1,0 +1,6 @@
+{
+    "cookie_session" : {
+        "secure" : false,
+        "sameSite" : "lax"
+    }
+}
