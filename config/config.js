@@ -4,7 +4,7 @@ const convict = require('convict');
 
 const config = convict({
     env: {
-      format: ['prod', 'dev'],
+      format: ['production', 'development'],
       default: 'dev',
       arg: 'nodeEnv',
       env: 'NODE_ENV'
