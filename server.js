@@ -20,14 +20,25 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// app.use(session({
+//     name : "garazeAuto-session",
+//     resave: false,
+//     saveUninitialized : true,
+//     cookie : {
+//         sameSite : "none",
+//         secure : true
+//     },
+//     secret: process.env.COOKIE_SECRET, 
+//     claudmja2.0@gmail.com testU7*
+// }))
 
 app.use(
     cookieSession({
       name: "garazeAuto-session",
-      secret: process.env.COOKIE_SECRET, 
+      secret: process.env.COOKIE_SECRET, // should use as secret environment variable
       httpOnly : true,
-      secure : config.cookie_session.secure,
-      sameSite : config.cookie_session.sameSite
+      sameSite : config.cookie_session.sameSite,
+      secure : config.cookie_session.secure
     })
 );
 
