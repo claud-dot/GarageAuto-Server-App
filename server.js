@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const bodyParser = require("body-parser");  
 const database  = require('./loaders/databases');
 const routes = require("./routes/config");
@@ -20,27 +21,26 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-// app.use(session({
-//     name : "garazeAuto-session",
-//     resave: false,
-//     saveUninitialized : true,
-//     cookie : {
-//         sameSite : "none",
-//         secure : true
-//     },
-//     secret: process.env.COOKIE_SECRET, 
-//     claudmja2.0@gmail.com testU7*
-// }))
+app.use(session({
+    name : "garazeAuto-session",
+    resave: false,
+    saveUninitialized : true,
+    cookie : {
+        sameSite : "none",
+        secure : true
+    },
+    secret: process.env.COOKIE_SECRET
+}))
 
-app.use(
-    cookieSession({
-      name: "garazeAuto-session",
-      secret: process.env.COOKIE_SECRET, // should use as secret environment variable
-      httpOnly : true,
-      sameSite : config.cookie_session.sameSite,
-      secure : config.cookie_session.secure
-    })
-);
+// app.use(
+//     cookieSession({
+//       name: "garazeAuto-session",
+//       secret: process.env.COOKIE_SECRET, // should use as secret environment variable
+//       httpOnly : true,
+//       sameSite : config.cookie_session.sameSite,
+//       secure : config.cookie_session.secure
+//     })
+// );
 
 function startServer(){
     database.mg_connect().then( db => {
