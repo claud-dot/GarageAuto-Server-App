@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
+const cookieParser = require('cookie-parser')
+const session = require('express-session');
 const bodyParser = require("body-parser");  
 const database  = require('./loaders/databases');
 const routes = require("./routes/config");
@@ -17,14 +19,21 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-    cookieSession({
-      name: "garazeAuto-session",
-      secret: process.env.COOKIE_SECRET, // should use as secret environment variable
-      httpOnly : true,
-      secure : true
-    })
-);
+app.use(cookieParser());
+app.use(session({
+    name : "garazeAuto-session",
+    resave:false,
+    saveUninitialized : true,
+    secret: process.env.COOKIE_SECRET,
+}))
+// app.use(
+//     cookieSession({
+//       name: "garazeAuto-session",
+//       secret: process.env.COOKIE_SECRET, // should use as secret environment variable
+//       httpOnly : true,
+//       secure : false
+//     })
+// );
 
 function startServer(){
     database.mg_connect().then( db => {
