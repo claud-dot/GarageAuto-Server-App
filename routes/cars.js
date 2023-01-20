@@ -6,6 +6,6 @@ module.exports = ( app , database)=>{
 
     app.get('/cars', [authVerify.verifyToken] , (req , res)=>{
         carContoller.getCars(database,res);
-    })
+    });
 
 }
