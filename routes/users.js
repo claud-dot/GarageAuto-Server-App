@@ -12,5 +12,13 @@ module.exports = (app , database) => {
         userContoller.getUser_role(database , res);
     })
 
+    app.get('/user/cars/:id', (req, res)=>{
+        userContoller.getUser_cars(database , req , res);
+    })
+
+    app.post('/user/add-car' ,[authVerify.verifyToken], (req , res)=>{
+        userContoller.addCar_user(database ,req , res);
+    })
+
 }
 

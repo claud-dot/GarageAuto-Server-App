@@ -44,7 +44,8 @@ exports.signUp = async (dataUser,database, res)=>{
                     res.status(400).send({ message: "Failed! Email is already in use!" });
                     return;
                 }
-            
+                userData.create_at = new Date();
+                userData.update_at = new Date();
                 database.collection("users").insertOne(userData, (err, result)=>{
                     if(err){
                         res.status(500).send({ message: err });
@@ -85,10 +86,12 @@ exports.signIn = async (dataUser,database, res , req)=>{
 
         req.session.token = token;
         res.status(200).send({
-            id: user._id,
+            id : user._id,
             username : user.username,
-            email: user.email,
-            role: user.role,
+            role : user.role,
+            email : user.email,
+            create_at : user.create_at,
+            update_at : user.update_at
         });
     });
 }
@@ -98,6 +101,6 @@ exports.signOut = async (req, res, next)=>{
         req.session = null;
         return res.status(200).send({ message: "You've been signed out!" });
     } catch (err) {
-    this.next(err);
+        this.next(err);
     }
 }

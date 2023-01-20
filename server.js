@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const cookieParser = require('cookie-parser');
-const session = require('express-session');
 const bodyParser = require("body-parser");  
 const database  = require('./loaders/databases');
 const routes = require("./routes/config");
@@ -21,18 +20,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-// app.use(session({
-//     name : "garazeAuto-session",
-//     resave: false,
-//     saveUninitialized : true,
-//     cookie : {
-//         sameSite : "none",
-//         secure : false
-//     },
-//     secret: process.env.COOKIE_SECRET
-// }))
 app.set('trust proxy' , 1);
-
 app.use(
     cookieSession({
       name: "garazeAuto-session",
@@ -51,7 +39,6 @@ function startServer(){
             if (err) throw err;
             console.log('Server listening on port ', process.env.NODE_PORT || 3000);
         });
-        
     });
 }
 
