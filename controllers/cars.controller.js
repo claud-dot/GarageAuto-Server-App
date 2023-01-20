@@ -1,5 +1,5 @@
-exports.getCars = (database , res)=>{
-
+exports.getCars = (database  , res)=>{
+    
     database.collection('cars').find().toArray((err , cars)=>{
         if(err){
             res.status(500).send({ message : err });
