@@ -1,3 +1,4 @@
+const { Db } = require('mongodb');
 
 const objectID = require('mongodb').ObjectId;
 
@@ -24,14 +25,8 @@ function insertRepair (database  , car_user, req , res){
     });
 }
 
-exports.addReparation = (database  , req, res) =>{
-    const car_user= {
-        user_id : objectID(req.body.user_id),
-        mark : req.body.mark,
-        model : req.body.model,
-        year_of_manufacture : req.body.year_of_manufacture
-    }
-
+function processCarUser(database , car_user , res, req){
+    delete car_user._id;
     //find voiture user
     database.collection('user_cars').findOne(car_user , (err , car)=>{
         if(err){
@@ -41,7 +36,6 @@ exports.addReparation = (database  , req, res) =>{
 
         //Rah tss dia inserena
         if (!car) {
-            console.log("car not exist");
             car_user.create_at = new Date();
             car_user.update_at = new Date();
             
@@ -52,13 +46,127 @@ exports.addReparation = (database  , req, res) =>{
                 }
     
                 if(result.insertedId){
-                    car_user._id = result.insertedId;
+                    car_user = {_id : result.insertedId , ...car_user};
                     insertRepair(database , car_user , req , res);
                 }
             })
         }else{
-            console.log("car exist");
-            insertRepair(database , car , req , res);
+            console.log("car exist" , car);
+            checkRepairAuthorize(database , car , req, res);
         }
+    })
+}
+
+function checkRepairAuthorize(database , car_user , req , res) {
+    
+    database.collection('repair').find({ "user_car._id" : car_user._id}).toArray((err , repairs)=>{
+        if(err){
+            res.status(500).send({ message : err });
+            return;
+        }
+        
+        for (const repair of repairs) {
+            if(repair.status!=3){
+                res.status(400).send({ message : "Failed ! , car under repair" });
+                return;
+            }
+        }
+        insertRepair(database , car , req , res);
+    })
+}
+
+exports.addReparation = (database  , req, res) =>{
+    
+    let car_user= {
+        user_id : objectID(req.body.user_id),
+        mark : req.body.mark,
+        model : req.body.model,
+        year_of_manufacture : req.body.year_of_manufacture
+    }
+
+    //verify if car exist !
+    database.collection('cars').findOne( { mark : car_user.mark , models : car_user.model } ,(err, car)=>{
+        if(err){
+            res.status(500).send({ message : err });
+            return;
+        }
+
+        if(!car){
+            res.status(404).send({ message : "Failed ! , car not exist" });
+            return;
+        }
+        //Check if car is on repair and have status incomplete
+        processCarUser(database , car_user , res , req);
+    }) 
+}
+
+exports.getRepairUser= (database , data , res)=>{
+    const pipeline = [
+        { $match : { "user_car.user_id" : objectID(data.id) } },
+        { $sort : { create_at  : -1 } },
+        { $facet : {
+            metadata : [
+                { $count : "total" },
+                { $addFields : { page : data.pageNumber}}
+            ],
+            data : [
+                { $skip : data.pageNumber > 0 ? ((data.pageNumber - 1 )* data.nbBypage) : 0 },
+                { $limit : data.nbBypage }
+            ]
+        } }
+    ]
+    database.collection('repair').aggregate(pipeline).toArray((err , repairs) => {
+        if(err){
+            res.status(500).send({ message : err });
+            return;
+        }
+        var car_repairs = repairs[0];
+        // statusRepair(car_repairs.data);
+        res.status(200).send( car_repairs ); 
+    });
+}
+
+
+exports.searchRepair = (database , req , res)=>{
+    const pipeline = [
+        { $match : { "user_car.user_id" : objectID(req.params.id) } },
+        { $sort : { create_at  : -1 } },
+        { $facet : {
+            metadata : [
+                { $count : "total" },
+                { $addFields : { page : data.pageNumber}}
+            ],
+            data : [
+                { $skip : data.pageNumber > 0 ? ((data.pageNumber - 1 )* data.nbBypage) : 0 },
+                { $limit : data.nbBypage }
+            ]
+        } }
+    ]
+}
+
+
+exports.getRepairCar = (database , req , res)=>{
+    const pipeline = [
+        { $match : { "user_car._id" : objectID(req.params.id) } },
+        { $sort : { create_at  : -1 } },
+        { $facet : {
+            metadata : [
+                { $count : "total" },
+                { $addFields : { page : data.pageNumber}}
+            ],
+            data : [
+                { $skip : data.pageNumber > 0 ? ((data.pageNumber - 1 )* data.nbBypage) : 0 },
+                { $limit : data.nbBypage }
+            ]
+        } }
+    ]
+
+    database.collection('repair').aggregate(pipeline).toArray((err, repairs)=>{
+        if(err){
+            res.status(500).send({ message : err });
+            return;
+        }
+        var car_repairs = repairs[0];
+        res.status(200).send( car_repairs );
     })
 }

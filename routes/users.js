@@ -12,8 +12,13 @@ module.exports = (app , database) => {
         userContoller.getUser_role(database , res);
     })
 
-    app.get('/user/cars/:id', (req, res)=>{
-        userContoller.getUser_cars(database , req , res);
+    app.get('/user/cars/:id/:page/:nbBypage', (req, res)=>{
+        const data = {
+            id : req.params.id,
+            pageNumber : Number.parseInt(req.params.page),
+            nbBypage : Number.parseInt(req.params.nbBypage)
+        }
+        userContoller.getUser_cars(database , data , res);
     })
 
     app.post('/user/add-car' ,[authVerify.verifyToken], (req , res)=>{
