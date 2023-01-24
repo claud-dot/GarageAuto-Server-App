@@ -1,0 +1,35 @@
+// MongoDB Playground
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+
+const database = 'garage-auto';
+
+use(database);
+
+
+// selection 
+// db.cars.find();
+// db.user_cars.find({_id : new ObjectId("63cab1e6dad8409d7ec8789c")});
+// db.users.find();
+// db.users.find({_id : new ObjectId("63c9318b27f05aba865558d2")});
+//db.repair.findOneAndUpdate({"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2")} , {$set : {advancement : 0, status : 0 }})
+// db.repair.find({"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2")} )
+// db.repair.find({"user_car.user_id" : new ObjectId("63cd8fa6f3df7c0a84170725")})
+
+// db.user_cars.find({ model :{ $regex : /c/i }});
+// db.user_cars.find({ create_at : { $gte : new Date("2023-01-22")}});
+// db.user_cars.aggregate([
+//     { $match : { create_at : { $gte : new Date("2023-01-21T00:00:00.000Z")}}}
+// ]);
+
+// db.user_cars.aggregate([
+//     { $match: { creat_at: { $gte: new Date("2023-01-22") } } }
+// ]);
+
+
+// db.user_cars.aggregate([{
+//     $match : { "mark": { $regex : "^.*bm.", $options : "i" } }
+// }])
+
+ db.repair.aggregate([{
+    $match : {"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2"), status : 0} 
+}])
