@@ -52,7 +52,6 @@ function processCarUser(database , car_user , res, req){
                 }
             })
         }else{
-            console.log("car exist" , car);
             checkRepairAuthorize(database , car , req, res);
         }
     })
@@ -102,7 +101,6 @@ exports.addReparation = (database  , req, res) =>{
 }
 
 function creatOjectMatch(data){
-    console.log(data);
     if(data.search){
         if(data.search.filterCar!=null && data.search.text!=null && data.search.filterStatus !=null  && data.search.date==null){
             return {
@@ -151,7 +149,6 @@ function creatOjectMatch(data){
 }
 
 exports.getRepairUser= (database , data , res)=>{
-    console.log(creatOjectMatch(data));
     const pipeline = [
         { $match : creatOjectMatch(data)},
         { $sort : { create_at  : -1 } },
@@ -171,7 +168,6 @@ exports.getRepairUser= (database , data , res)=>{
             res.status(500).send({ message : err });
             return;
         }
-        console.log(repairs);
         var car_repairs = repairs[0];
         res.status(200).send( car_repairs ); 
     });
@@ -179,7 +175,6 @@ exports.getRepairUser= (database , data , res)=>{
 
 exports.getRepairCarStory = (database , req , res)=>{
     const data = JSON.parse(req.params.data);
-    console.log(data);
     const dataMatch = data.status=="null" ? 
                     { "user_car._id" : objectID(data.car_id) , "user_car.user_id" : objectID(data.user_id) } : 
                     {"user_car._id" : objectID(data.car_id) , "user_car.user_id" : objectID(data.user_id) , status : parseInt(data.status) } ;

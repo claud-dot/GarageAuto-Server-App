@@ -52,7 +52,6 @@ function creatOjectMatch(data){
 }
 
 exports.getUser_cars = (database , data, res)=>{
-    console.log(creatOjectMatch(data));
     const pipeline = [
         { $match : creatOjectMatch(data)},
         { $sort : { create_at : -1 } },
@@ -69,7 +68,6 @@ exports.getUser_cars = (database , data, res)=>{
     ]
     database.collection('user_cars').aggregate(pipeline).toArray((err, data_cars)=>{
         if(err){
-            console.log(err);
             res.status(500).send({ message : err });
             return;
         }
@@ -96,7 +94,6 @@ exports.addCar_user = (database , req , res) =>{
         }
         car_user.create_at = new Date();
         car_user.update_at = new Date();
-        console.log(car_user);
         database.collection('user_cars').insertOne(car_user , (err , result)=>{
             if(err){
                 res.status(500).send({ message: err });
