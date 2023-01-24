@@ -29,7 +29,7 @@ function creatOjectMatch(data){
         if(data.search.filter!=null && data.search.text!=null){
             return {
                 user_id : objectID(data.user_id), 
-                [data.search.filter]: { $regex : "^.*"+data.search.text+"." , $options : "i" } 
+                [data.search.filter]: { $regex : "^.*"+data.search.text+".*" , $options : "i" } 
             }
         }else if(data.search.text==null && data.search.dates[0].start!='') {
             const dateOject = {
@@ -43,7 +43,7 @@ function creatOjectMatch(data){
         }else{
             return { 
                 user_id : objectID(data.user_id), 
-                "mark": { $regex : "^.*"+data.search.text+"." , $options : "i" } 
+                "mark": { $regex : "^.*"+data.search.text+".*" , $options : "i" } 
             }
         }
     }else{

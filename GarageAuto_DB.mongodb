@@ -30,4 +30,6 @@ use(database);
 //     $match : { "mark": { $regex : "^.*bm.", $options : "i" } }
 // }])
 
-db.user_cars.find();
+ db.repair.aggregate([{
+    $match : {"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2"), status : 0} 
+}])

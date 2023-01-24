@@ -101,35 +101,59 @@ exports.addReparation = (database  , req, res) =>{
     }) 
 }
 
-exports.getRepairUser= (database , data , res)=>{
-    const pipeline = [
-        { $match : { "user_car.user_id" : objectID(data.id) } },
-        { $sort : { create_at  : -1 } },
-        { $facet : {
-            metadata : [
-                { $count : "total" },
-                { $addFields : { page : data.pageNumber}}
-            ],
-            data : [
-                { $skip : data.pageNumber > 0 ? ((data.pageNumber - 1 )* data.nbBypage) : 0 },
-                { $limit : data.nbBypage }
-            ]
-        } }
-    ]
-    database.collection('repair').aggregate(pipeline).toArray((err , repairs) => {
-        if(err){
-            res.status(500).send({ message : err });
-            return;
+function creatOjectMatch(data){
+    console.log(data);
+    if(data.search){
+        if(data.search.filterCar!=null && data.search.text!=null && data.search.filterStatus !=null  && data.search.date==null){
+            return {
+                "user_car.user_id" : objectID(data.user_id), 
+                ["user_car."+data.search.filterCar]: { $regex : "^.*"+data.search.text+".*" , $options : "i" },
+                status : parseInt(data.search.filterStatus)
+            }
+        }else if(data.search.filterCar==null && data.search.text!=null && data.search.filterStatus !=null  && data.search.date==null){
+            return {
+                "user_car.user_id" : objectID(data.user_id), 
+                "user_car.mark": { $regex : "^.*"+data.search.text+".*" , $options : "i" } ,
+                status : parseInt(data.search.filterStatus)
+            }
+        }else if(data.search.filterCar!=null && data.search.text!=null && data.search.filterStatus ==null && data.search.date==null){
+            return {
+                "user_car.user_id" : objectID(data.user_id), 
+                ["user_car."+data.search.filterCar]: { $regex : "^.*"+data.search.text+".*" , $options : "i" } 
+            }
+        }else if(data.search.filterCar==null && data.search.text==null && data.search.filterStatus !=null  && data.search.date==null){
+            return {
+                "user_car.user_id" : objectID(data.user_id), 
+                status : parseInt(data.search.filterStatus)
+            }
+        }else if(data.search.filterStatus !=null && data.search.date!=null) { 
+            return {
+                "user_car.user_id" : objectID(data.user_id),
+                ["user_car."+data.search.filterCar] : { $gte :  new Date(data.search.date+'') },
+                status : parseInt(data.search.filterStatus)
+            } 
+        }else if(data.search.filterStatus==null && data.search.date!=null) { 
+            return {
+                "user_car.user_id" : objectID(data.user_id),
+                ["user_car."+data.search.filterCar] : { $gte :  new Date(data.search.date+'') },
+            } 
+        }else if(data.search.text!=null){
+            return { 
+                "user_car.user_id" : objectID(data.user_id),
+                "user_car.mark": { $regex : "^.*"+data.search.text+".*" , $options : "i" } ,
+            }
+        }else{
+            return  { "user_car.user_id" : objectID(data.user_id) }
         }
-        var car_repairs = repairs[0];
-        // statusRepair(car_repairs.data);
-        res.status(200).send( car_repairs ); 
-    });
+    }else{
+        return  { "user_car.user_id" : objectID(data.user_id) }
+    }
 }
 
-exports.searchRepair = (database , req , res)=>{
+exports.getRepairUser= (database , data , res)=>{
+    console.log(creatOjectMatch(data));
     const pipeline = [
-        { $match : { "user_car.user_id" : objectID(req.params.id) } },
+        { $match : creatOjectMatch(data)},
         { $sort : { create_at  : -1 } },
         { $facet : {
             metadata : [
@@ -142,8 +166,16 @@ exports.searchRepair = (database , req , res)=>{
             ]
         } }
     ]
+    database.collection('repair').aggregate(pipeline).toArray((err , repairs) => {
+        if(err){
+            res.status(500).send({ message : err });
+            return;
+        }
+        console.log(repairs);
+        var car_repairs = repairs[0];
+        res.status(200).send( car_repairs ); 
+    });
 }
-
 
 exports.getRepairCarStory = (database , req , res)=>{
     const data = JSON.parse(req.params.data);
