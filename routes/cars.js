@@ -8,4 +8,7 @@ module.exports = ( app , database)=>{
         carContoller.getCars(database,res);
     });
 
+    app.get('/car/:id_car' , [authVerify.verifyToken] , (req , res)=>{
+        carContoller.getCar(database,req,res);
+    });
 }

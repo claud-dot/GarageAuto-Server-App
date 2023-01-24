@@ -12,8 +12,8 @@ module.exports = (app , database) => {
         userContoller.getUser_role(database , res);
     })
 
-    app.get('/user/cars/:id', (req, res)=>{
-        userContoller.getUser_cars(database , req , res);
+    app.get('/user/cars/:data', (req, res)=>{
+        userContoller.getUser_cars(database , JSON.parse(req.params.data) , res);
     })
 
     app.post('/user/add-car' ,[authVerify.verifyToken], (req , res)=>{
