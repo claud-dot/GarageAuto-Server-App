@@ -1,4 +1,3 @@
-const { Db } = require('mongodb');
 
 const objectID = require('mongodb').ObjectId;
 
@@ -38,6 +37,8 @@ function processCarUser(database , car_user , res, req){
         if (!car) {
             car_user.create_at = new Date();
             car_user.update_at = new Date();
+            car_user.repair_at = new Date();
+            car_user.finish_at = "";
             
             database.collection('user_cars').insertOne(car_user , (err , result)=>{
                 if(err){
@@ -126,7 +127,6 @@ exports.getRepairUser= (database , data , res)=>{
     });
 }
 
-
 exports.searchRepair = (database , req , res)=>{
     const pipeline = [
         { $match : { "user_car.user_id" : objectID(req.params.id) } },
@@ -134,10 +134,10 @@ exports.searchRepair = (database , req , res)=>{
         { $facet : {
             metadata : [
                 { $count : "total" },
-                { $addFields : { page : data.pageNumber}}
+                { $addFields : { page : data.page}}
             ],
             data : [
-                { $skip : data.pageNumber > 0 ? ((data.pageNumber - 1 )* data.nbBypage) : 0 },
+                { $skip : data.page > 0 ? ((data.page - 1 )* data.nbBypage) : 0 },
                 { $limit : data.nbBypage }
             ]
         } }
@@ -145,27 +145,32 @@ exports.searchRepair = (database , req , res)=>{
 }
 
 
-exports.getRepairCar = (database , req , res)=>{
+exports.getRepairCarStory = (database , req , res)=>{
+    const data = JSON.parse(req.params.data);
+    console.log(data);
+    const dataMatch = data.status=="null" ? 
+                    { "user_car._id" : objectID(data.car_id) , "user_car.user_id" : objectID(data.user_id) } : 
+                    {"user_car._id" : objectID(data.car_id) , "user_car.user_id" : objectID(data.user_id) , status : parseInt(data.status) } ;
     const pipeline = [
-        { $match : { "user_car._id" : objectID(req.params.id) } },
+        { $match : dataMatch },
         { $sort : { create_at  : -1 } },
         { $facet : {
             metadata : [
                 { $count : "total" },
-                { $addFields : { page : data.pageNumber}}
+                { $addFields : { page : data.page}}
             ],
             data : [
-                { $skip : data.pageNumber > 0 ? ((data.pageNumber - 1 )* data.nbBypage) : 0 },
+                { $skip : data.page > 0 ? ((data.page - 1 )* data.nbBypage) : 0 },
                 { $limit : data.nbBypage }
             ]
         } }
     ]
-
+    
     database.collection('repair').aggregate(pipeline).toArray((err, repairs)=>{
         if(err){
             res.status(500).send({ message : err });
             return;
-        }
+        }   
         var car_repairs = repairs[0];
         res.status(200).send( car_repairs );
     })

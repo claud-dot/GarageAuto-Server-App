@@ -7,12 +7,17 @@ module.exports = ( app , database)=>{
         repairController.addReparation(database , req , res);
     });
 
-    app.get('/car/user/repair/:id/:page/:nbBypage' , [authVerify.verifyToken] , (req , res)=>{
+    app.get('/car/user/repair/:data' , [authVerify.verifyToken] , (req , res)=>{
+        const dataParse = JSON.parse(req.params.data);
         const data = {
-            id : req.params.id,
-            pageNumber : Number.parseInt(req.params.page),
-            nbBypage : Number.parseInt(req.params.nbBypage)
+            id : dataParse.id,
+            pageNumber : Number.parseInt(dataParse.page),
+            nbBypage : Number.parseInt(dataParse.nbBypage)
         }
         repairController.getRepairUser(database , data , res);
+    })
+    
+    app.get('/car/user/repair/story/:data', [authVerify.verifyToken] , (req , res)=>{
+        repairController.getRepairCarStory(database , req , res);
     })
 }

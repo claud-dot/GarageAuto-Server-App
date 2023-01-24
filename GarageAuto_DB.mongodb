@@ -6,149 +6,6 @@ const database = 'garage-auto';
 use(database);
 
 
-db.cars.drop();
-db.user_role.drop();
-db.user_cars.drop();
-db.repair.drop();
-
-db.createCollection("cars");
-db.createCollection("user_role");
-db.createCollection("user_cars");
-db.createCollection("repair");
-
-db.cars.insertMany([
-    {
-        mark : "Peugeot",
-        models : [
-            "206 CC",
-            "206 SW",
-            "207 CC",
-            "207 SW",
-            "1007",
-            "205",
-        ],
-        create_at : new Date(),
-        update_at : new Date()
-    },
-    {
-        mark : "Renault",
-        models : [
-            "Alpine",
-            "Arkana",
-            "Austral",
-            "Avantime",
-            "Capture",
-        ],
-        create_at : new Date(),
-        update_at : new Date()
-    },
-    {
-        mark : "Citroen",
-        models : [
-            "2 CV - Dyane",
-            "AX",
-            "Berlingo",
-            "BX",
-            "C1",
-        ],
-        create_at : new Date(),
-        update_at : new Date()
-    },
-    {
-        mark : "Volkswagen",
-        models : [
-            "Amarok",
-            "Atreon",
-            "Beetle",
-            "Bola",
-            "Caravelle",
-            "COCCINELLE II",
-            "Caddy",
-        ],
-        create_at : new Date(),
-        update_at : new Date()
-    },{
-        mark : "Audi",
-        models : [
-            "Allroad",
-            "Coupé",
-            "E-TRON",
-            "200",
-            "RS Q3",
-        ],
-        create_at : new Date(),
-        update_at : new Date()
-    },
-    {
-        mark : "BMW",
-        models : [
-            "i8",
-            "iX",
-            "M2",
-            "M6",
-            "Serie1",
-            "Serie4",
-            "Z8",
-        ],
-        create_at : new Date(),
-        update_at : new Date()
-    },
-    {
-        mark : "Mercedes",
-        models : [
-            "AMG GT",
-            "Citran",
-            "Class A",
-            "Class B",
-            "Class CLS",
-            "Vaneo",
-        ],
-        create_at : new Date(),
-        update_at : new Date()
-    },
-  ] 
-);
-
-db.user_role.insertMany([
-  {
-    role : "Client",
-    description : "Personne qui a des voiture à reparer",
-    create_at : new Date(),
-    update_at : new Date()
-  },
-  {
-    role : "Responsable Atelier",
-    description : "Personne responsable de la reparation des voitures",
-    create_at : new Date(),
-    update_at : new Date()
-  },
-  {
-    role : "Responsable Financier",
-    description : "Personne responsable de la payement de frais de reparation des voitures",
-    create_at : new Date(),
-    update_at : new Date()
-  }
-]);
-
-db.user_cars.insertMany([
-    {
-        user_id : new ObjectId("63c9318b27f05aba865558d2"),
-        mark : "Mercedes",
-        model : "Vaneo",
-        year_of_manufacture : "2019",
-        create_at : new Date(),
-        update_at : new Date()
-    },
-    {
-        user_id : new ObjectId("63c9318b27f05aba865558d2"),
-        mark : "Audi",
-        model : "E-TRON",
-        year_of_manufacture : "2021",
-        create_at : new Date(),
-        update_at : new Date()
-    }
-])
-
 // selection 
 // db.cars.find();
 // db.user_cars.find({_id : new ObjectId("63cab1e6dad8409d7ec8789c")});
@@ -157,3 +14,20 @@ db.user_cars.insertMany([
 //db.repair.findOneAndUpdate({"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2")} , {$set : {advancement : 0, status : 0 }})
 // db.repair.find({"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2")} )
 // db.repair.find({"user_car.user_id" : new ObjectId("63cd8fa6f3df7c0a84170725")})
+
+// db.user_cars.find({ model :{ $regex : /c/i }});
+// db.user_cars.find({ create_at : { $gte : new Date("2023-01-22")}});
+// db.user_cars.aggregate([
+//     { $match : { create_at : { $gte : new Date("2023-01-21T00:00:00.000Z")}}}
+// ]);
+
+// db.user_cars.aggregate([
+//     { $match: { creat_at: { $gte: new Date("2023-01-22") } } }
+// ]);
+
+
+// db.user_cars.aggregate([{
+//     $match : { "mark": { $regex : "^.*bm.", $options : "i" } }
+// }])
+
+db.user_cars.find();

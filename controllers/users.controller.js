@@ -24,18 +24,45 @@ exports.getUser_role = (database , res)=>{
     });
 }
 
-exports.getUser_cars = (database , data, res)=>{
+function creatOjectMatch(data){
+    if(data.search){
+        if(data.search.filter!=null && data.search.text!=null){
+            return {
+                user_id : objectID(data.user_id), 
+                [data.search.filter]: { $regex : "^.*"+data.search.text+"." , $options : "i" } 
+            }
+        }else if(data.search.text==null && data.search.dates[0].start!='') {
+            const dateOject = {
+                user_id : objectID(data.user_id),
+                [data.search.filter] : { $gte :  new Date(data.search.dates[0].start+'') ,  $lte :  new Date(data.search.dates[0].end+'') }
+            }
+            if(dateOject[data.search.filter].$lte+''=='Invalid Date'){
+                delete dateOject[data.search.filter].$lte;
+            }
+            return dateOject ;
+        }else{
+            return { 
+                user_id : objectID(data.user_id), 
+                "mark": { $regex : "^.*"+data.search.text+"." , $options : "i" } 
+            }
+        }
+    }else{
+        return  { user_id : objectID(data.user_id) }
+    }
+}
 
+exports.getUser_cars = (database , data, res)=>{
+    console.log(creatOjectMatch(data));
     const pipeline = [
-        { $match : { user_id : objectID(data.id) } },
+        { $match : creatOjectMatch(data)},
         { $sort : { create_at : -1 } },
         { $facet : {
             metadata : [
                 { $count : "total" },
-                { $addFields : { page : data.pageNumber }}
+                { $addFields : { page : data.page }}
             ],
             data : [
-                { $skip : data.pageNumber > 0 ? ((data.pageNumber - 1 )* data.nbBypage) : 0 },
+                { $skip : data.page > 0 ? ((data.page - 1 )* data.nbBypage) : 0 },
                 { $limit : data.nbBypage }
             ]
         } }
