@@ -24,13 +24,54 @@ exports.getUser_role = (database , res)=>{
     });
 }
 
-exports.getUser_cars = (database , req, res)=>{
-    database.collection('user_cars').find({ user_id : objectID(req.params.id) }).toArray((err, user_cars) => {
+function creatOjectMatch(data){
+    if(data.search){
+        if(data.search.filter!=null && data.search.text!=null){
+            return {
+                user_id : objectID(data.user_id), 
+                [data.search.filter]: { $regex : "^.*"+data.search.text+".*" , $options : "i" } 
+            }
+        }else if(data.search.text==null && data.search.dates[0].start!='') {
+            const dateOject = {
+                user_id : objectID(data.user_id),
+                [data.search.filter] : { $gte :  new Date(data.search.dates[0].start+'') ,  $lte :  new Date(data.search.dates[0].end+'') }
+            }
+            if(dateOject[data.search.filter].$lte+''=='Invalid Date'){
+                delete dateOject[data.search.filter].$lte;
+            }
+            return dateOject ;
+        }else{
+            return { 
+                user_id : objectID(data.user_id), 
+                "mark": { $regex : "^.*"+data.search.text+".*" , $options : "i" } 
+            }
+        }
+    }else{
+        return  { user_id : objectID(data.user_id) }
+    }
+}
+
+exports.getUser_cars = (database , data, res)=>{
+    const pipeline = [
+        { $match : creatOjectMatch(data)},
+        { $sort : { create_at : -1 } },
+        { $facet : {
+            metadata : [
+                { $count : "total" },
+                { $addFields : { page : data.page }}
+            ],
+            data : [
+                { $skip : data.page > 0 ? ((data.page - 1 )* data.nbBypage) : 0 },
+                { $limit : data.nbBypage }
+            ]
+        } }
+    ]
+    database.collection('user_cars').aggregate(pipeline).toArray((err, data_cars)=>{
         if(err){
-            res.status(500).send(err);
+            res.status(500).send({ message : err });
             return;
         }
-        res.status(200).send(user_cars);
+        res.status(200).send(data_cars[0]);
     });
 }
 
@@ -53,7 +94,6 @@ exports.addCar_user = (database , req , res) =>{
         }
         car_user.create_at = new Date();
         car_user.update_at = new Date();
-        console.log(car_user);
         database.collection('user_cars').insertOne(car_user , (err , result)=>{
             if(err){
                 res.status(500).send({ message: err });
