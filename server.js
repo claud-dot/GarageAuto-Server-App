@@ -32,6 +32,7 @@ app.use(
 );
 
 function startServer(){
+    database.mongoose_connect();
     database.mg_connect().then( db => {
         routes.configure(app , db); 
         console.log(config);

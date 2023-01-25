@@ -1,5 +1,6 @@
 
 const objectID = require('mongodb').ObjectId;
+const Repair=require('../models/repair');
 
 function insertRepair (database  , car_user, req , res){
     const repair = {
@@ -201,4 +202,21 @@ exports.getRepairCarStory = (database , req , res)=>{
         var car_repairs = repairs[0];
         res.status(200).send( car_repairs );
     })
+}
+
+//afficher la liste des demandes de reparations
+exports.listRequest=(req,res)=>{
+    Repair.find()
+    .then(repairs=>{
+        res.json(repairs);
+    })
+    .catch(err=>err.status(400).json(err));
+};
+
+exports.createReparation=(req,res)=>{
+    const newReparation=new Repair(req.body);
+    console.log(newReparation);
+    newReparation.save()
+        .then(repair=>res.json(repair))
+        .catch(err=>res.status(400).json(err));
 }
