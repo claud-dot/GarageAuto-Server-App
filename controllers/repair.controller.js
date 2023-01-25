@@ -71,7 +71,7 @@ function checkRepairAuthorize(database , car_user , req , res) {
                 return;
             }
         }
-        insertRepair(database , car , req , res);
+        insertRepair(database , car_user , req , res);
     })
 }
 
