@@ -1,6 +1,7 @@
 
 const objectID = require('mongodb').ObjectId;
 const Repair=require('../models/repair');
+const invoice = require('../routes/invoice');
 
 function insertRepair (database  , car_user, req , res){
     const repair = {
@@ -166,13 +167,34 @@ exports.getRepairUser= (database , data , res)=>{
             ]
         } }
     ]
+    
     database.collection('repair').aggregate(pipeline).toArray((err , repairs) => {
         if(err){
             res.status(500).send({ message : err });
             return;
         }
         var car_repairs = repairs[0];
-        res.status(200).send( car_repairs ); 
+        var listIdRepair = [];
+        for (const repair of car_repairs.data) {
+            listIdRepair.push(objectID(repair._id));
+        }
+        
+        //Pour savoir si la facture est deja de retour
+        database.collection('invoices').find({ repair_id : { $in : listIdRepair }  }).toArray((err , invoices)=>{
+            if(err){
+                res.status(500).send({ message : err });
+                return;
+            }
+
+            for (let index = 0; index < car_repairs.data.length; index++) {
+                for (const invoice of invoices) {
+                    if(invoice.repair_id.equals(car_repairs.data[index]._id)){
+                        car_repairs.data[index].isFactured = true;
+                    } 
+                }
+            }
+            res.status(200).send( car_repairs ); 
+        })
     });
 }
 
@@ -204,6 +226,53 @@ exports.getRepairCarStory = (database , req , res)=>{
         var car_repairs = repairs[0];
         res.status(200).send( car_repairs );
     })
+}
+
+//Responsable Financier
+exports.getPayementRepair = (database , data , res)=>{
+    
+    database.collection('invoices').find({ status : 1 }).toArray((err , invoices)=>{
+        if(err){
+            res.status(500).send({ message : err });
+            return;
+        }
+
+        if(invoices.length<=0){
+            res.status(200).send(undefined);
+            return;
+        }
+
+        let listIdRepair = [];
+        for (const invoice of invoices) {
+            listIdRepair.push(invoice['repair_id']);
+        }
+
+        const pipeline = [
+            { $match :  { _id : { $in : listIdRepair } }},
+            { $sort : { repair_at  : -1 } },
+            { $facet : {
+                metadata : [
+                    { $count : "total" },
+                    { $addFields : { page : data.page}}
+                ],
+                data : [
+                    { $skip : data.page > 0 ? ((data.page - 1 )* data.nbBypage) : 0 },
+                    { $limit : data.nbBypage }
+                ]
+            } }
+        ];
+
+        database.collection('repair').aggregate(pipeline).toArray((err , repairs)=>{
+            if(err){
+                res.status(500).send({ message : err });
+                return;
+            }
+            console.log(listIdRepair);
+            var car_repairs = repairs[0];
+            res.status(200).send( car_repairs );
+        })
+    })
+    console.log(data);
 }
 
 //afficher la liste des demandes de reparations
