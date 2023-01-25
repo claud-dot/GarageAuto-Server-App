@@ -17,4 +17,8 @@ module.exports = ( app , database)=>{
     app.get('/car/user/repair/story/:data', [authVerify.verifyToken] , (req , res)=>{
         repairController.getRepairCarStory(database , req , res);
     })
+
+    app.get('/repair/payment/:data',[authVerify.verifyToken] , (req , res)=>{
+        repairController.getPayementRepair(database , JSON.parse(req.params.data) , res);
+    })
 }

@@ -4,7 +4,7 @@ const auth = require('./auth');
 const workshop = require('./workshop');
 const cars = require('./cars');
 const car_repair = require('./repair');
-const inovice = require('./inovice');
+const invoice = require('./invoice');
 
 
 function configure(app , database) {
@@ -25,7 +25,7 @@ function configure(app , database) {
     car_repair(app,database);
 
     //Facture
-    inovice(app , database);
+    invoice(app , database);
 }
 
 exports.configure = configure;
