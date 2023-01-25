@@ -38,3 +38,8 @@ exports.getInvoiceRepair=(database , req, res)=>{
         });
     });
 }
+
+exports.payInnvoice = (database , req , res)=>{
+    database.collection('invoice').findOneAndUpdate({ _id : ObjectId(req.params._id) }, { $set : { status : 1} })
+
+}
