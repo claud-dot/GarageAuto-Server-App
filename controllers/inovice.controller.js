@@ -25,7 +25,6 @@ exports.getInoviceRepair=(database , req, res)=>{
            inovice.subTotal = sub;
            inovice.withTax = tax;
            inovice.totalAmount = (sub + tax);
-           console.log(inovice);
        }
        res.status(200).send(inovice);
     });
