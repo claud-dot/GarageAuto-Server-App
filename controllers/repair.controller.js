@@ -1,6 +1,6 @@
 
 const objectID = require('mongodb').ObjectId;
-const Repair=require('../models/repair');
+// const Repair=require('../models/repair');
 
 function insertRepair (database  , car_user, req , res){
     const repair = {
@@ -8,6 +8,8 @@ function insertRepair (database  , car_user, req , res){
         comment : req.body.comment,
         advancement : 0.0,
         status : 0,
+        repair_at : new Date(),
+        finish_at : new Date(),
         create_at : new Date(),
         update_at : new Date() 
     }
