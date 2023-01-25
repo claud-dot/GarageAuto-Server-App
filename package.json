@@ -22,6 +22,7 @@
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.0",
     "mongodb": "^4.13.0",
+    "mongoose": "^6.8.4",
     "nodemailer": "^6.9.0",
     "nodemon": "^2.0.20",
     "session": "^0.1.0"
