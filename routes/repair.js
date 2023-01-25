@@ -7,6 +7,9 @@ module.exports = ( app , database)=>{
         repairController.addReparation(database , req , res);
     });
 
+    app.get('/cars/repairRequest/list', [authVerify.verifyToken],repairController.listRequest);
+    app.post('/cars/addRepair', [authVerify.verifyToken],repairController.createReparation);
+
     app.get('/car/user/repair/:data' , [authVerify.verifyToken] , (req , res)=>{
         repairController.getRepairUser(database , JSON.parse(req.params.data) , res);
     })
