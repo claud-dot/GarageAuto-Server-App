@@ -5,33 +5,73 @@ const database = 'garage-auto';
 
 use(database);
 
+db.invoices.drop();
 
-db.cars.drop();
-db.user_role.drop();
-db.user_cars.drop();
-db.repair.drop();
-db.inovices.drop();
-
-db.createCollection("cars");
-db.createCollection("user_role");
-db.createCollection("user_cars");
-db.createCollection("repair");
-db.createCollection("inovices");
+db.createCollection('invoices');
 
 
-db.inovices.insertOne({
-    repair_id : new ObjectId("63d0534cb067f399138fde2b") ,
-    result_comment : [
-        { description : "Bougie de ref 2", qt : 2  , unit_price : 10000 , montant : 20000 },
-        { description : "Carburateur x360LS", qt : 1  , unit_price : 20000 , montant : 20000 },
-        { description : "Gresse", qt : 4  , unit_price : 7000 , montant : 28000 },
-        { description : "Gente ref Kol:2205", qt : 2  , unit_price : 40000 , montant : 80000 },
-    ],
-    see : false,
-    status : 0,
-    create_at : new Date(),
-    update_at : new Date() 
-})
+
+db.invoices.insertMany([
+    {
+        repair_id : new ObjectId("63d0534cb067f399138fde2b") ,
+        results_comment : [
+            { description : "Bougie de ref 2", qt : 2  , unit_price : 10000 , montant : 20000 },
+            { description : "Carburateur x360LS", qt : 1  , unit_price : 20000 , montant : 20000 },
+            { description : "Gresse", qt : 4  , unit_price : 7000 , montant : 28000 },
+            { description : "Gente ref Kol:2205", qt : 2  , unit_price : 40000 , montant : 80000 },
+        ],
+        status : 1,
+        create_at : new Date(),
+        update_at : new Date() 
+    },
+    {
+        repair_id : new ObjectId("63cd9a3f6ed161c5148f342f") ,
+        results_comment : [
+            { description : "Claxon 10 pair", qt : 1  , unit_price : 30000 , montant : 30000 },
+            { description : "Pedale excentrique ref BII2", qt : 2  , unit_price : 20000 , montant : 40000 },
+            { description : "Batterie GfTX", qt : 1  , unit_price : 27250 , montant : 27250 }
+        ],
+        status : 1,
+        create_at : new Date(),
+        update_at : new Date() 
+    },
+    {
+        repair_id : new ObjectId("63cd9b9c6ed161c5148f3435") ,
+        results_comment : [
+            { description : "Bougie de ref 2", qt : 2  , unit_price : 10000 , montant : 20000 },
+            { description : "Carburateur x360LS", qt : 1  , unit_price : 20000 , montant : 20000 },
+            { description : "Gresse", qt : 4  , unit_price : 7000 , montant : 28000 },
+            { description : "Gente ref Kol:2205", qt : 2  , unit_price : 40000 , montant : 80000 },
+        ],
+        status : 1,
+        create_at : new Date(),
+        update_at : new Date() 
+    },
+    {
+        repair_id : new ObjectId("63cd9dab6ed161c5148f343b") ,
+        results_comment : [
+            { description : "Claxon 10 pair", qt : 1  , unit_price : 30000 , montant : 30000 },
+            { description : "Pedale excentrique ref BII2", qt : 2  , unit_price : 20000 , montant : 40000 },
+            { description : "Batterie GfTX", qt : 1  , unit_price : 27250 , montant : 27250 }
+        ],
+        status : 0,
+        create_at : new Date(),
+        update_at : new Date() 
+    },
+    {
+        repair_id : new ObjectId("63cd9d3d6ed161c5148f3439") ,
+        results_comment : [
+            { description : "Bougie de ref 2", qt : 2  , unit_price : 10000 , montant : 20000 },
+            { description : "Carburateur x360LS", qt : 1  , unit_price : 20000 , montant : 20000 },
+            { description : "Gresse", qt : 4  , unit_price : 7000 , montant : 28000 },
+            { description : "Gente ref Kol:2205", qt : 2  , unit_price : 40000 , montant : 80000 },
+        ],
+        status : 0,
+        create_at : new Date(),
+        update_at : new Date() 
+    },
+    
+])
 
 // selection 
 // db.cars.find();
@@ -40,4 +80,5 @@ db.inovices.insertOne({
 // db.users.find({_id : new ObjectId("63c9318b27f05aba865558d2")});
 //db.repair.findOneAndUpdate({"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2")} , {$set : {advancement : 0, status : 0 }})
 // db.repair.find({"user_car.user_id" : new ObjectId("63c9318b27f05aba865558d2")} )
-// db.repair.find({"user_car.user_id" : new ObjectId("63cd8fa6f3df7c0a84170725")})
+db.invoices.find()
+
