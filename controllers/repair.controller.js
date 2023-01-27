@@ -1,7 +1,7 @@
 
 const objectID = require('mongodb').ObjectId;
 const Repair=require('../models/repair');
-const invoice = require('../routes/invoice');
+const utils = require('../utils');
 
 function insertRepair (database  , car_user, req , res){
     const repair = {
@@ -104,58 +104,11 @@ exports.addReparation = (database  , req, res) =>{
     }) 
 }
 
-function creatOjectMatch(data){
-    if(data.search){
-        if(data.search.filterCar!=null && data.search.text!=null && data.search.filterStatus !=null  && data.search.date==null){
-            return {
-                "user_car.user_id" : objectID(data.user_id), 
-                ["user_car."+data.search.filterCar]: { $regex : "^.*"+data.search.text+".*" , $options : "i" },
-                status : parseInt(data.search.filterStatus)
-            }
-        }else if(data.search.filterCar==null && data.search.text!=null && data.search.filterStatus !=null  && data.search.date==null){
-            return {
-                "user_car.user_id" : objectID(data.user_id), 
-                "user_car.mark": { $regex : "^.*"+data.search.text+".*" , $options : "i" } ,
-                status : parseInt(data.search.filterStatus)
-            }
-        }else if(data.search.filterCar!=null && data.search.text!=null && data.search.filterStatus ==null && data.search.date==null){
-            return {
-                "user_car.user_id" : objectID(data.user_id), 
-                ["user_car."+data.search.filterCar]: { $regex : "^.*"+data.search.text+".*" , $options : "i" } 
-            }
-        }else if(data.search.filterCar==null && data.search.text==null && data.search.filterStatus !=null  && data.search.date==null){
-            return {
-                "user_car.user_id" : objectID(data.user_id), 
-                status : parseInt(data.search.filterStatus)
-            }
-        }else if(data.search.filterStatus !=null && data.search.date!=null) { 
-            return {
-                "user_car.user_id" : objectID(data.user_id),
-                ["user_car."+data.search.filterCar] : { $gte :  new Date(data.search.date+'') },
-                status : parseInt(data.search.filterStatus)
-            } 
-        }else if(data.search.filterStatus==null && data.search.date!=null) { 
-            return {
-                "user_car.user_id" : objectID(data.user_id),
-                ["user_car."+data.search.filterCar] : { $gte :  new Date(data.search.date+'') },
-            } 
-        }else if(data.search.text!=null){
-            return { 
-                "user_car.user_id" : objectID(data.user_id),
-                "user_car.mark": { $regex : "^.*"+data.search.text+".*" , $options : "i" } ,
-            }
-        }else{
-            return  { "user_car.user_id" : objectID(data.user_id) }
-        }
-    }else{
-        return  { "user_car.user_id" : objectID(data.user_id) }
-    }
-}
 
 exports.getRepairUser= (database , data , res)=>{
     const pipeline = [
-        { $match : creatOjectMatch(data)},
-        { $sort : { create_at  : -1 } },
+        { $match : utils.creatOjectMatchRepair(data)},
+        { $sort : { update_at  : -1 } },
         { $facet : {
             metadata : [
                 { $count : "total" },
@@ -185,6 +138,7 @@ exports.getRepairUser= (database , data , res)=>{
                 res.status(500).send({ message : err });
                 return;
             }
+            //console.log( invoices , car_repairs.data);
 
             for (let index = 0; index < car_repairs.data.length; index++) {
                 for (const invoice of invoices) {
@@ -201,11 +155,18 @@ exports.getRepairUser= (database , data , res)=>{
 exports.getRepairCarStory = (database , req , res)=>{
     const data = JSON.parse(req.params.data);
     const dataMatch = data.status=="null" ? 
-                    { "user_car._id" : objectID(data.car_id) , "user_car.user_id" : objectID(data.user_id) } : 
-                    {"user_car._id" : objectID(data.car_id) , "user_car.user_id" : objectID(data.user_id) , status : parseInt(data.status) } ;
+        { 
+            "user_car._id" : objectID(data.car_id) , 
+            "user_car.user_id" : objectID(data.user_id) 
+        }: 
+        {
+            "user_car._id" : objectID(data.car_id) , 
+            "user_car.user_id" : objectID(data.user_id) , 
+            status : parseInt(data.status) 
+        } ;
     const pipeline = [
         { $match : dataMatch },
-        { $sort : { create_at  : -1 } },
+        { $sort : { update_at  : -1 } },
         { $facet : {
             metadata : [
                 { $count : "total" },
@@ -231,14 +192,13 @@ exports.getRepairCarStory = (database , req , res)=>{
 //Responsable Financier
 exports.getPayementRepair = (database , data , res)=>{
     
-    database.collection('invoices').find({ status : 1 }).toArray((err , invoices)=>{
+    database.collection('invoices').find({ status : { $gte : 1 } }).toArray((err , invoices)=>{
         if(err){
             res.status(500).send({ message : err });
             return;
         }
-
         if(invoices.length<=0){
-            res.status(200).send(undefined);
+            res.status(200).send({ metadata : [] , data : []});
             return;
         }
 
@@ -249,7 +209,7 @@ exports.getPayementRepair = (database , data , res)=>{
 
         const pipeline = [
             { $match :  { _id : { $in : listIdRepair } }},
-            { $sort : { repair_at  : -1 } },
+            { $sort : { status : 1 , update_at  : -1 } },
             { $facet : {
                 metadata : [
                     { $count : "total" },
@@ -267,12 +227,43 @@ exports.getPayementRepair = (database , data , res)=>{
                 res.status(500).send({ message : err });
                 return;
             }
-            console.log(listIdRepair);
             var car_repairs = repairs[0];
             res.status(200).send( car_repairs );
         })
     })
-    console.log(data);
+}
+
+exports.getRepairStat = (database , data, res)=>{
+    const dataFind = {};
+    let index= 0;
+    for (const key in data) {
+       if(data[key].trim()!=""){
+            dataFind["user_car."+key] = data[key];
+            index++;
+       }
+    }
+    dataFind["status"] = { $gte : 2 };
+    (index<=0 ? database.collection('repair').find(dataFind).limit(10) : database.collection('repair').find(dataFind))
+        .toArray((err , repairs)=>{
+        if(err){
+            res.status(500).send({ message : err });
+        }
+        const listIdRepair = [];
+        for (const repair of repairs) {
+            listIdRepair.push(repair._id);
+        }
+        database.collection('invoices').aggregate([
+            { $match : { repair_id : { $in  : listIdRepair  }} }
+        ]).toArray((err , invoices)=>{
+            utils.getExistInvoice(repairs , invoices);
+            const dataSend = {
+                repair : repairs,
+                invoice : invoices,
+                durations : utils.durationRepair(invoices , res)
+            }
+            res.status(200).send(dataSend);
+        });
+    })
 }
 
 //afficher la liste des demandes de reparations
