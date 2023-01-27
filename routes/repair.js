@@ -8,6 +8,7 @@ module.exports = ( app , database)=>{
     });
 
     app.get('/cars/repairRequest/list', [authVerify.verifyToken],repairController.listRequest);
+
     app.post('/cars/addRepair', [authVerify.verifyToken],repairController.createReparation);
 
     app.get('/car/user/repair/:data' , [authVerify.verifyToken] , (req , res)=>{
@@ -20,5 +21,14 @@ module.exports = ( app , database)=>{
 
     app.get('/repair/payment/:data',[authVerify.verifyToken] , (req , res)=>{
         repairController.getPayementRepair(database , JSON.parse(req.params.data) , res);
+    })
+
+    app.get('/repair/statistique/:data' , [authVerify.verifyToken], (req, res)=>{
+        repairController.getRepairStat(database , JSON.parse(req.params.data) , res);
+    })
+
+    app.get('/repair/salary/:data' , [authVerify.verifyToken] , (req , res)=>{
+        // repairController.
+        console.log(req.params.data);
     })
 }

@@ -8,4 +8,16 @@ module.exports = ( app , database)=>{
         invoiceController.getInvoiceRepair(database , req , res);
     });
 
+    app.put('/invoice/pay',[authVerify.verifyToken] , (req , res)=>{
+        invoiceController.payInvoice(database , req , res);
+    });
+
+    app.put('/invoice/pay/valid',[authVerify.verifyToken] , (req , res)=>{
+        invoiceController.validInvoice(database , req , res);
+    });
+
+    app.get('/invoice/turnover/:unit_duration',[authVerify.verifyToken], (req , res)=>{
+        invoiceController.getTurnover(database , req , res);
+    })
+
 } 
