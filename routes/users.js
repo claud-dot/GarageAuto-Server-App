@@ -20,5 +20,9 @@ module.exports = (app , database) => {
         userContoller.addCar_user(database ,req , res);
     })
 
+    app.get('/user/simulate/:data',[authVerify.verifyToken] ,(req , res)=>{
+        userContoller.simulateDepense(database,JSON.parse(req.params.data) , res);
+    })
+
 }
 

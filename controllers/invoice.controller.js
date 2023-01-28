@@ -132,9 +132,11 @@ exports.getTurnover = (database , req , res)=>{
             res.status(500).send({ message : err });
             return;
         }
-        res.status(200).send({
+        const dataSend = {
             dataBase : data,
             dataStat :  utils.getDataTurnover(req.params.unit_duration , data)
-        });
+        }
+        res.status(200).send(dataSend);
+        return dataSend;
     });
 }
