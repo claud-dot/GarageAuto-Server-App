@@ -1,6 +1,11 @@
 const ObjectId = require('mongodb').ObjectId;
 const utils = require('../utils');
-
+const Repair = require("../models/repair");
+const Invoice=require("../models/invoices")
+const fs = require('fs');
+const Pdfmake = require('pdfmake');
+const path = require('path');
+const FileSaver=require('file-saver');
 function subTotal(results) {
     let val = 0;
     for (const result of results) {
@@ -22,7 +27,7 @@ function setPropetyInvoice(invoice){
 }
 
 exports.getInvoiceRepair=(database , req, res)=>{
-
+    console.log("id_repair:"+req.params.id_repair);
     database.collection('invoices').findOne({ repair_id : ObjectId(req.params.id_repair) } , (err, invoice)=>{
         if(err){
          res.status(500).send({ message : err });
@@ -137,4 +142,85 @@ exports.getTurnover = (database , req , res)=>{
             dataStat :  utils.getDataTurnover(req.params.unit_duration , data)
         });
     });
+}
+exports.createReparation=(req,res)=>{
+    const newReparation=new Repair(req.body);
+    console.log(newReparation);
+    newReparation.save()
+        .then(repair=>res.json(repair))
+        .catch(err=>res.status(400).json(err));
+}
+exports.sendInvoice=(req,res)=>{
+    const new_invoice=new Invoice(req.body);
+    console.log(new_invoice);
+    new_invoice.save()
+        .then(new_invoice=>res.json(new_invoice))
+        .catch(err=>res.status(400).json(err));
+}
+
+exports.sendInvoicePdf=(req,res)=>{
+    const new_invoice=new Invoice(req.body);
+    let fonts = {
+        Roboto: {
+            normal:  path.join(__dirname, 'fonts/Roboto-Regular.ttf'),
+            bold:  path.join(__dirname, 'fonts/Roboto-Medium.ttf'),
+            italics:  path.join(__dirname, 'fonts/Roboto-Italic.ttf'),
+            bolditalics:  path.join(__dirname, 'fonts/Roboto-MediumItalic.ttf')
+        }
+    };
+
+    let pdfmake = new Pdfmake(fonts);
+
+    let dd = {
+        content: [
+            {
+                columns:[
+                    {
+                        text: 'Email:mandaRatovo44@gmail.com'
+                    },
+                    {
+                        text: 'Date:29/01/2023\nstatus:payé\nsldks'
+                    }
+                ],
+                columnGap: 250,
+            },
+            {
+                layout: 'lightHorizontalLines', // optional
+                table: {
+                    // headers are automatically repeated if the table spans over multiple pages
+                    // you can declare how many rows should be treated as headers
+                    margin: [0, 50, 0, 0],
+                    headerRows: 1,
+                    widths: [ 20, 'auto', 100, '*',100 ],
+
+                    body: [
+                        [ '#','Description', 'Quantité', 'Prix unitaire(AR)', 'Prix total(AR)',]
+                    ]
+                },
+            },{
+                columns:[
+                    {text:""},
+                    {text:"Total: 10000Ar",lineHeight:1.5},
+
+                ],
+                columnGap:300
+            }
+        ]
+
+    }
+    for(let i=0;i<new_invoice.results_comment.length;i++){
+        let temp=[
+            {text:i+1,bold:true},
+            new_invoice.results_comment[i].description,
+            new_invoice.results_comment[i].qt,
+            new_invoice.results_comment[i].unit_price,
+            new_invoice.results_comment[i].montant
+        ]
+        dd.content[1].table.body.push(temp);
+    }
+    let pdfDoc = pdfmake.createPdfKitDocument(dd, {});
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=test.pdf');
+    pdfDoc.pipe(res);
+    pdfDoc.end();
 }

@@ -20,5 +20,9 @@ module.exports = (app , database) => {
         userContoller.addCar_user(database ,req , res);
     })
 
+    app.get('/user/get/:id',(req, res)=>{
+        console.log("ato")
+        userContoller.getUserById(req,res,req.params.id.trim());
+    })
 }
 

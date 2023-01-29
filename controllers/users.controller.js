@@ -1,5 +1,8 @@
+const Repair = require("../models/repair");
 
 const objectID = require('mongodb').ObjectId;
+
+const User=require("../models/users")
 
 exports.getUser = (database, res ) => {
     
@@ -105,4 +108,21 @@ exports.addCar_user = (database , req , res) =>{
             }
         })
     });
+}
+
+
+exports.listRequest=(req,res)=>{
+    Repair.find()
+        .then(repairs=>{
+            res.json(repairs);
+        })
+        .catch(err=>err.status(400).json(err));
+};
+
+exports.getUserById=(req,res,id)=>{
+    User.findById(id).exec()
+        .then(user => {
+            res.json(user);
+        })
+        .catch(err=>res.status(400).json(err))
 }
