@@ -1,6 +1,7 @@
 const Repair = require("../models/repair");
 
 const objectID = require('mongodb').ObjectId;
+const utils = require('../utils');
 
 const User=require("../models/users")
 
@@ -109,8 +110,6 @@ exports.addCar_user = (database , req , res) =>{
         })
     });
 }
-
-
 exports.listRequest=(req,res)=>{
     Repair.find()
         .then(repairs=>{
@@ -125,4 +124,43 @@ exports.getUserById=(req,res,id)=>{
             res.json(user);
         })
         .catch(err=>res.status(400).json(err))
+}
+//Financier
+exports.simulateDepense = (database ,dataSimulation , res)=>{
+    const req = {
+        params : {
+            unit_duration: "mois"
+        }
+    }
+    const pipeline = [
+        { $match : { status : { $gte : 2 } } },
+        {
+            "$unwind": "$results_comment" //pour acceder a une array dans mongoDb
+        },
+        {
+            $group : {
+                _id: utils.groupUnitDuration(req.params.unit_duration),
+                totalAmount: { $sum: { $multiply: [ "$results_comment.unit_price", "$results_comment.qt" ] } },
+                count: { $sum: 1 }
+             }
+        }
+    ]
+   
+    database.collection('invoices').aggregate(pipeline).toArray((err , data)=>{
+        if(err){
+            console.log(err);
+            res.status(500).send({ message : err });
+            return;
+        }
+        const dataSend = {
+            dataBase : data,
+            dataStat :  utils.getDataTurnover(req.params.unit_duration , data)
+        }
+        if(dataSimulation.choice =='global'){
+            dataSend.dataStat = utils.getBeneficeGlobal(dataSend.dataStat , dataSimulation);
+        }else{
+            dataSend.dataStat = utils.getBeneficeMois(dataSend.dataStat, dataSimulation);
+        }
+        res.status(200).send(dataSend);
+    });
 }

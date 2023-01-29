@@ -1,4 +1,5 @@
 const objectID = require('mongodb').ObjectId;
+let months = ['Janvier' , 'Février' ,'Mars' , 'Avril' , 'Mai' ,'Juin' ,'Juillet' , 'Aôut' , 'Septembre' , 'Octobre' , 'Novembre' , 'Décembre'];
 
 exports.tabToString = (tab)=>{
     var val = '';
@@ -182,7 +183,6 @@ function sortDataDay(dataFind) {
 }
 
 function monthTurnover(dataFind){
-    let months = ['Janvier' , 'Février' ,'Mars' , 'Avril' , 'Mai' ,'Juin' ,'Juillet' , 'Aôut' , 'Septembre' , 'Octobre' , 'Novembre' , 'Décembre'];
     let montants = [];
     let contr = 0;
     for (let index = 0; index < 12; index++) {
@@ -217,3 +217,66 @@ function getMonthName(monthNumber) {
     date.setMonth(monthNumber - 1);
     return date.toLocaleString('fr-FR', { month: 'long' });
 }
+
+
+exports.getBeneficeGlobal= (dataIncoice , dataSimulation)=> {
+    let montBenefice = [];
+    let labels = dataIncoice.labels; 
+    let dataMont = dataIncoice.data;
+    let depense = sumDepense(dataSimulation.data);
+    for (let index = 0; index < labels.length; index++) {
+        const diff = dataMont[index] - depense;
+        montBenefice.push(diff);
+    }
+    return {
+        data : montBenefice,
+        labels: labels
+    }
+}
+
+exports.getBeneficeMois= (dataIncoice , dataSimulation)=>{
+    let montBenefice = [];
+    let labels = dataIncoice.labels; 
+    let dataMont = dataIncoice.data;
+    let depenseMois = getDepenseMois(dataSimulation).montants;
+    for (let index = 0; index < labels.length; index++) {
+        const diff = dataMont[index] - depenseMois[index] ;
+        console.log(dataMont[index] , ' - ', depenseMois[index] , "=", diff); 
+        montBenefice.push(diff);
+    }
+    return {
+        data : montBenefice,
+        labels: labels
+    }
+}
+
+function getDepenseMois(dataSimulation){
+    let labelSimule = [];
+    let montSimule = [];
+    let incr = 0;
+    const dataLoop = dataSimulation.data;
+    for (const month of months) {
+        for (let index = 0; index < dataLoop.length; index++) {
+            if(month==dataLoop[index].month){
+                labelSimule.push(month);
+                montSimule.push(sumDepense(dataLoop[index]));
+                incr=0;
+                break;
+            }
+            incr+=1;
+        }
+        if(incr!=0){
+            labelSimule.push(month); 
+            montSimule.push(0) ;
+        }
+    }
+    return {
+        montants : montSimule,
+        labels : labelSimule
+    }
+}
+
+function sumDepense(dataSimulation) {
+    return (dataSimulation.salary+dataSimulation.rent+dataSimulation.piece+dataSimulation.other)
+}
+

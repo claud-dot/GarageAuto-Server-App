@@ -19,8 +19,10 @@ module.exports = (app , database) => {
     app.post('/user/add-car' ,[authVerify.verifyToken], (req , res)=>{
         userContoller.addCar_user(database ,req , res);
     })
-
-    app.get('/user/get/:id',(req, res)=>{
+app.get('/user/simulate/:data',[authVerify.verifyToken] ,(req , res)=>{
+        userContoller.simulateDepense(database,JSON.parse(req.params.data) , res);
+    })
+app.get('/user/get/:id',(req, res)=>{
         console.log("ato")
         userContoller.getUserById(req,res,req.params.id.trim());
     })
