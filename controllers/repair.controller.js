@@ -255,6 +255,10 @@ exports.getRepairStat = (database , data, res)=>{
         database.collection('invoices').aggregate([
             { $match : { repair_id : { $in  : listIdRepair  }} }
         ]).toArray((err , invoices)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send({ message: err });
+            }
             utils.getExistInvoice(repairs , invoices);
             const dataSend = {
                 repair : repairs,
