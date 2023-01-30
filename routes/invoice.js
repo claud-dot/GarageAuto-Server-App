@@ -18,6 +18,14 @@ module.exports = ( app , database)=>{
 
     app.get('/invoice/turnover/:unit_duration',[authVerify.verifyToken], (req , res)=>{
         invoiceController.getTurnover(database , req , res);
+    });
+
+    app.post('/invoice/send',(req,res)=>{
+        invoiceController.sendInvoice(req,res);
+    });
+
+    app.post('/invoice/getPDF',(req,res)=>{
+        invoiceController.sendInvoicePdf(req,res);
     })
 
 } 

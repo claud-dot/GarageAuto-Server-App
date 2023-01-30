@@ -106,8 +106,25 @@ exports.addReparation = (database  , req, res) =>{
 
 
 exports.getRepairUser= (database , data , res)=>{
+   
     const pipeline = [
         { $match : utils.creatOjectMatchRepair(data)},
+        { $lookup:
+            {
+              from: "user_cars",
+              localField: "user_car._id",
+              foreignField: "_id",
+              as: "user_cars"
+            } 
+        },
+        { $lookup:
+            {
+              from: "invoices",
+              localField: "_id",
+              foreignField: "repair_id",
+              as: "invoice_repair"
+            } 
+        },
         { $sort : { update_at  : -1 } },
         { $facet : {
             metadata : [
@@ -127,37 +144,20 @@ exports.getRepairUser= (database , data , res)=>{
             return;
         }
         var car_repairs = repairs[0];
-        var listIdRepair = [];
         for (const repair of car_repairs.data) {
-            listIdRepair.push(objectID(repair._id));
+            repair.user_cars = repair.user_cars[0];
+            repair.invoice_repair = repair.invoice_repair[0];
         }
-        
-        //Pour savoir si la facture est deja de retour
-        database.collection('invoices').find({ repair_id : { $in : listIdRepair }  }).toArray((err , invoices)=>{
-            if(err){
-                res.status(500).send({ message : err });
-                return;
-            }
-            //console.log( invoices , car_repairs.data);
-
-            for (let index = 0; index < car_repairs.data.length; index++) {
-                for (const invoice of invoices) {
-                    if(invoice.repair_id.equals(car_repairs.data[index]._id)){
-                        car_repairs.data[index].isFactured = true;
-                    } 
-                }
-            }
-            res.status(200).send( car_repairs ); 
-        })
+        res.status(200).send( car_repairs ); 
     });
 }
 
 exports.getRepairCarStory = (database , req , res)=>{
     const data = JSON.parse(req.params.data);
     const dataMatch = data.status=="null" ? 
-        { 
-            "user_car._id" : objectID(data.car_id) , 
-            "user_car.user_id" : objectID(data.user_id) 
+    { 
+        "user_car._id" : objectID(data.car_id) , 
+        "user_car.user_id" : objectID(data.user_id) 
         }: 
         {
             "user_car._id" : objectID(data.car_id) , 
@@ -183,54 +183,86 @@ exports.getRepairCarStory = (database , req , res)=>{
         if(err){
             res.status(500).send({ message : err });
             return;
-        }   
-        var car_repairs = repairs[0];
-        res.status(200).send( car_repairs );
+        }
+        const listId = [];
+        for(let repair of repairs[0].data){
+            listId.push(repair._id);
+        }
+
+        database.collection("invoices").find({ repair_id : { $in : listId}}).toArray((err , invoices)=>{
+            if(err){
+                res.status(500).send({ message : err });
+                return;
+            }
+            let invoiceSend = [];
+            let incr = 0;
+            for (const id_repair of listId) {
+                const index = invoices.findIndex((invoice)=> invoice.repair_id.equals(id_repair));
+                if(index==-1){
+                    invoiceSend.push({});
+                }else{
+                    invoiceSend.push(invoices[index]);
+                }
+                incr++;
+            }
+
+            var car_repairs ={
+                repairs : repairs[0],
+                invoices : invoiceSend
+            } 
+            res.status(200).send( car_repairs );
+        })
     })
 }
 
 //Responsable Financier
 exports.getPayementRepair = (database , data , res)=>{
-    
-    database.collection('invoices').find({ status : { $gte : 1 } }).toArray((err , invoices)=>{
+
+    const pipeline = [
+        { $match :  { status : { $gte : 1 } }},
+        {
+            $lookup: {
+              from: "user_cars",
+              localField: "user_car._id",
+              foreignField: "_id",
+              as: "user_cars"
+            } 
+        },
+        {
+            $lookup: {
+              from: "invoices",
+              localField: "_id",
+              foreignField: "repair_id",
+              as: "invoices"
+            } 
+        },
+        { $sort : { status : 1 , update_at  : -1 } },
+        { $facet : {
+            metadata : [
+                { $count : "total" },
+                { $addFields : { page : data.page}}
+            ],
+            data : [
+                { $skip : data.page > 0 ? ((data.page - 1 )* data.nbBypage) : 0 },
+                { $limit : data.nbBypage }
+            ]
+        } }
+    ];
+
+    database.collection('repair').aggregate(pipeline).toArray((err , repairs)=>{
         if(err){
             res.status(500).send({ message : err });
             return;
         }
-        if(invoices.length<=0){
-            res.status(200).send({ metadata : [] , data : []});
-            return;
+        var car_repairs = repairs.length<=0 ? [] : repairs[0];
+        console.log(car_repairs.data[1]);
+        for (const repair of car_repairs.data) {
+            repair.user_cars = repair.user_cars[0];
+            repair.invoice_repair = repair.invoices[0];
         }
-
-        let listIdRepair = [];
-        for (const invoice of invoices) {
-            listIdRepair.push(invoice['repair_id']);
-        }
-
-        const pipeline = [
-            { $match :  { _id : { $in : listIdRepair } }},
-            { $sort : { status : 1 , update_at  : -1 } },
-            { $facet : {
-                metadata : [
-                    { $count : "total" },
-                    { $addFields : { page : data.page}}
-                ],
-                data : [
-                    { $skip : data.page > 0 ? ((data.page - 1 )* data.nbBypage) : 0 },
-                    { $limit : data.nbBypage }
-                ]
-            } }
-        ];
-
-        database.collection('repair').aggregate(pipeline).toArray((err , repairs)=>{
-            if(err){
-                res.status(500).send({ message : err });
-                return;
-            }
-            var car_repairs = repairs[0];
-            res.status(200).send( car_repairs );
-        })
-    })
+        res.status(200).send( car_repairs );
+    });
+    
 }
 
 exports.getRepairStat = (database , data, res)=>{
@@ -247,6 +279,7 @@ exports.getRepairStat = (database , data, res)=>{
         .toArray((err , repairs)=>{
         if(err){
             res.status(500).send({ message : err });
+            return;
         }
         const listIdRepair = [];
         for (const repair of repairs) {
@@ -255,6 +288,11 @@ exports.getRepairStat = (database , data, res)=>{
         database.collection('invoices').aggregate([
             { $match : { repair_id : { $in  : listIdRepair  }} }
         ]).toArray((err , invoices)=>{
+            if(err){
+                console.log(err);
+                res.status(500).send({ message: err });
+                return;
+            }
             utils.getExistInvoice(repairs , invoices);
             const dataSend = {
                 repair : repairs,

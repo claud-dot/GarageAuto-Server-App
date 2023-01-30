@@ -14,4 +14,8 @@ module.exports = (app,database) => {
         authController.signOut(req , res , next)     
     });
 
+    app.get('/auth/cookies' , (req , res , next)=>{
+        authController.cookies(req, res , next);
+    })
+
 }

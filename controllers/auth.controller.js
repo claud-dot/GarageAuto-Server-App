@@ -104,3 +104,11 @@ exports.signOut = async (req, res, next)=>{
         this.next(err);
     }
 }
+
+exports.cookies= (req , res , next)=> {
+    let token = req.session.token;
+    if(!token){
+        res.status(401).send({ message: "Unauthorized!" });
+    }
+    res.status(200).send({ token : token });
+  }
