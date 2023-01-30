@@ -24,5 +24,13 @@ module.exports = (app , database) => {
         userContoller.simulateDepense(database,JSON.parse(req.params.data) , res);
     })
 
+    app.put('/user/car-photo',[authVerify.verifyToken] , (req, res)=>{
+        userContoller.update_photo_car(database ,req.body , res);
+    })
+
+    app.post('/user/car/delete', [authVerify.verifyToken] , (req , res)=>{
+        userContoller.deleteCar(database , req.body , res);
+    })
+
 }
 

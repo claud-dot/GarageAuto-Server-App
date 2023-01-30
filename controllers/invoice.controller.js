@@ -28,6 +28,11 @@ exports.getInvoiceRepair=(database , req, res)=>{
          res.status(500).send({ message : err });
          return;
         }
+
+        if (!invoice) {
+            res.status(400).send({ message : "Invoice not found !" });
+            return;
+        }
         
         setPropetyInvoice(invoice);
         database.collection('repair').findOne({ _id : ObjectId(req.params.id_repair) } , (err , repair)=>{
