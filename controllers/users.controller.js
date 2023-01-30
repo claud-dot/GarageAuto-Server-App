@@ -1,6 +1,9 @@
+const Repair = require("../models/repair");
 
 const objectID = require('mongodb').ObjectId;
 const utils = require('../utils');
+
+const User=require("../models/users")
 
 exports.getUser = (database, res ) => {
     
@@ -107,8 +110,21 @@ exports.addCar_user = (database , req , res) =>{
         })
     });
 }
+exports.listRequest=(req,res)=>{
+    Repair.find()
+        .then(repairs=>{
+            res.json(repairs);
+        })
+        .catch(err=>err.status(400).json(err));
+};
 
-
+exports.getUserById=(req,res,id)=>{
+    User.findById(id).exec()
+        .then(user => {
+            res.json(user);
+        })
+        .catch(err=>res.status(400).json(err))
+}
 //Financier
 exports.simulateDepense = (database ,dataSimulation , res)=>{
     const req = {
@@ -146,5 +162,47 @@ exports.simulateDepense = (database ,dataSimulation , res)=>{
             dataSend.dataStat = utils.getBeneficeMois(dataSend.dataStat, dataSimulation);
         }
         res.status(200).send(dataSend);
+    });
+}
+
+exports.update_photo_car = (dataBase ,  dataCar , res )=>{
+    dataBase.collection('user_cars').findOneAndUpdate({ _id : objectID(dataCar.id_car) } , 
+        { $set : { img_url : dataCar.image, update_at : new Date() } } , (err , response)=>{
+            if (err) {
+                res.status(500).send({ message : err });
+                return;
+            }
+            if(!response.value){
+                res.status(403).send({ message : "Car inexist !" });
+                return;
+            }
+            res.status(200).send({ message : "Car photo changed successfully !" });
+    });
+}
+
+exports.deleteCar = (database , data , res ) =>{
+    database.collection('user_cars').findOneAndDelete({ _id : objectID(data.id_car) , user_id : objectID(data.user_id) } , (err , response)=>{
+        if (err) {
+            res.status(500).send({ message : err });
+            return;
+        }
+        if(!response.value){
+            res.status(403).send({ message : "Car inexist !" });
+            return;
+        }
+        database.collection('repair').findOneAndDelete({ "user_car._id" : objectID(data.id_car) } , (err , repair)=>{
+            if (err) {
+                res.status(500).send({ message : err });
+                return;
+            }
+            console.log(repair);
+            database.collection('invoices').deleteMany({ repair_id :  objectID(repair.value._id)} , (err , response)=>{
+                if (err) {
+                    res.status(500).send({ message : err });
+                    return;
+                }
+                res.status(200).send({ message : "Car deleted successfully !" });
+            });
+        })
     });
 }

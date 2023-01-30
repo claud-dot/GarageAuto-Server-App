@@ -32,7 +32,8 @@ exports.durationRepair = (invoices , res)=>{
         }
         return durations;
     } catch (error) {
-        res.status(400).send({ message : error });
+        console.log(error);
+        res.status(500).send({ message : error });
         return;
     }
 }
