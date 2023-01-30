@@ -19,12 +19,22 @@ module.exports = (app, database) => {
     app.post('/user/add-car', [authVerify.verifyToken], (req, res) => {
         userContoller.addCar_user(database, req, res);
     })
-    app.get('/user/simulate/:data', [authVerify.verifyToken], (req, res) => {
-        userContoller.simulateDepense(database, JSON.parse(req.params.data), res);
+    
+    app.get('/user/simulate/:data',[authVerify.verifyToken] ,(req , res)=>{
+        userContoller.simulateDepense(database,JSON.parse(req.params.data) , res);
     })
-    app.get('/user/get/:id', (req, res) => {
-        console.log("ato")
-        userContoller.getUserById(req, res, req.params.id.trim());
+
+    app.put('/user/car-photo',[authVerify.verifyToken] , (req, res)=>{
+        userContoller.update_photo_car(database ,req.body , res);
+    })
+
+    app.post('/user/car/delete', [authVerify.verifyToken] , (req , res)=>{
+        userContoller.deleteCar(database , req.body , res);
+    })
+
+    app.get('/user/get/:id',(req, res)=>{
+        //console.log("ato")
+        userContoller.getUserById(req,res,req.params.id.trim());
     })
 }
 
