@@ -146,6 +146,7 @@ exports.getRepairUser= (database , data , res)=>{
         var car_repairs = repairs[0];
         for (const repair of car_repairs.data) {
             repair.user_cars = repair.user_cars[0];
+            repair.isFactured = true;
             repair.invoice_repair = repair.invoice_repair[0];
         }
         res.status(200).send( car_repairs ); 
@@ -308,6 +309,7 @@ exports.getRepairStat = (database , data, res)=>{
 exports.listRequest=(req,res)=>{
     Repair.find()
     .then(repairs=>{
+        console.log(repairs);
         res.json(repairs);
     })
     .catch(err=>err.status(400).json(err));
