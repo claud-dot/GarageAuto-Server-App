@@ -33,7 +33,7 @@ module.exports = (app, database) => {
     })
 
     app.get('/user/get/:id',(req, res)=>{
-        //console.log("ato")
+        console.log("ato")
         userContoller.getUserById(req,res,req.params.id.trim());
     })
 }
